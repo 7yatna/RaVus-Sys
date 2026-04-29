@@ -34,6 +34,7 @@
 #include "anain.h"
 #include "param_save.h"
 #include "my_math.h"
+#include "math.h"
 #include "errormessage.h"
 #include "printf.h"
 #include "stm32scheduler.h"
@@ -47,6 +48,41 @@ extern "C" void __cxa_pure_virtual()
 {
     while (1);
 }
+
+typedef struct 
+	{
+		uint16_t temp;   // °C
+		uint8_t  pot;    // 0–255
+	} TempPotLUT;
+static const TempPotLUT lut[] = 
+	{
+		{ 10,  150},
+		{ 20,  140},
+		{ 21,  130},
+		{ 22,  120},
+		{ 25,  110},
+		{ 27,  100},
+		{ 28,  95 },
+		{ 29,  90 },
+		{ 30,  85 },
+		{ 31,  80 },
+		{ 32,  75 },
+		{ 35,  70 },
+		{ 38,  65 },
+		{ 39,  60 },
+		{ 40,  55 },
+		{ 41,  50 },
+		{ 43,  45 },
+		{ 48,  40 },
+		{ 50,  35 },
+		{ 52,  30 },
+		{ 59,  25 },
+		{ 60,  20 },
+		{ 63,  15 },
+		{ 72,  10 },
+		{ 81,  5 },
+		{108,  0 }
+	};
 
 static Stm32Scheduler* scheduler;
 static CanHardware* can;
@@ -81,11 +117,11 @@ static void Ms100Task(void)
 	CHARGE = DigIo::CHARGE.Get();
 	Param::SetInt(Param::IGN, IGN);
 	Param::SetInt(Param::CHARGE, CHARGE);
-	Pot_Val = utils::change(Mot_Temp, 20, 100, 255, 128);
-	if (Pot_Val > 255) Pot_Val = 255;
-	if (Pot_Val < 128) Pot_Val = 128;
+	if (Mot_Temp < 10) Mot_Temp = 10;
+	if (Mot_Temp > 108) Mot_Temp = 108;
+	Pot_Val = TempToPot(Mot_Temp);
 	Param::SetInt(Param::Pot1, Pot_Val);
-	
+	Param::SetInt(Param::CAN_T1, Mot_Temp);
 	if (((Param::GetInt(Param::IGN))) || ((Param::GetInt(Param::CHARGE))) || (Param::GetInt(Param::TimeOut) == 0) || (CAN_ON)) 
 	{
 		Param::SetInt(Param::Mode, 1);
@@ -122,7 +158,35 @@ static void Ms200Task(void)
 	CAN_ON = 0;
 }
 
+uint8_t TempToPot(uint16_t temp)
+{
+    /* Clamp */
+    if (temp <= lut[0].temp)
+        return lut[0].pot;
 
+    if (temp >= lut[sizeof(lut)/sizeof(lut[0]) - 1].temp)
+        return lut[sizeof(lut)/sizeof(lut[0]) - 1].pot;
+
+    /* Find segment */
+    for (uint32_t i = 0; i < (sizeof(lut)/sizeof(lut[0]) - 1); i++)
+    {
+        uint16_t t1 = lut[i].temp;
+        uint16_t t2 = lut[i + 1].temp;
+
+        if (temp >= t1 && temp <= t2)
+        {
+            int16_t p1 = lut[i].pot;
+            int16_t p2 = lut[i + 1].pot;
+
+            /* Linear interpolation */
+            return (uint8_t)(
+                p1 + (int32_t)(temp - t1) * (p2 - p1) / (t2 - t1)
+            );
+        }
+    }
+
+    return 0; /* should never happen */
+}
 
 void Can_Tasks()
 {
@@ -151,7 +215,6 @@ void DecodeCAN(int id, uint32_t* data)
 			CAN_ON = bytes[0];
 			break;
 		case 0x501:
-			//Param::SetInt(Param::Pot1, bytes[0]);
 			Mot_Temp = bytes[0];
 			break;
 		case 0x502:

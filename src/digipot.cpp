@@ -26,7 +26,7 @@
 void DigiPot::SetPot1Step()
 	{	
 		int wip1 = 0;
-		wip1 = utils::change((Param::GetInt(Param::Pot1)), 0, 127, 0, 100);
+		wip1 = utils::change((Param::GetInt(Param::Pot1)), 0, 255, 0, 100);
 		DigIo::POT_CS.Clear();
 		spi_xfer(SPI1, 0);
 		spi_xfer(SPI1, (Param::GetInt(Param::Pot1)));
@@ -37,7 +37,7 @@ void DigiPot::SetPot1Step()
 void DigiPot::SetPot2Step()
 	{	
 		int wip2 = 0;
-		wip2 = utils::change((Param::GetInt(Param::Pot2)), 0, 127, 0, 100);
+		wip2 = utils::change((Param::GetInt(Param::Pot2)), 0, 255, 0, 100);
 		DigIo::POT_CS.Clear();
 		spi_xfer(SPI1, 1);
 		spi_xfer(SPI1, (Param::GetInt(Param::Pot2)));
@@ -48,7 +48,7 @@ void DigiPot::SetPot2Step()
 void DigiPot::SetPot3Step()
 	{	
 		int wip3 = 0;
-		wip3 = utils::change((Param::GetInt(Param::Pot3)), 0, 127, 0, 100);
+		wip3 = utils::change((Param::GetInt(Param::Pot3)), 0, 255, 0, 100);
 		DigIo::POT_CS.Clear();
 		spi_xfer(SPI1, 2);
 		spi_xfer(SPI1, (Param::GetInt(Param::Pot3)));
@@ -59,7 +59,7 @@ void DigiPot::SetPot3Step()
 void DigiPot::SetPot4Step()
 	{	
 		int wip4 = 0;
-		wip4 = utils::change((Param::GetInt(Param::Pot4)), 0, 127, 0, 100);
+		wip4 = utils::change((Param::GetInt(Param::Pot4)), 0, 255, 0, 100);
 		DigIo::POT_CS.Clear();
 		spi_xfer(SPI1, 3);
 		spi_xfer(SPI1, (Param::GetInt(Param::Pot4)));

@@ -37,6 +37,7 @@ void write_bootloader_pininit();
 void Can_Tasks();
 void DecodeCAN();
 void LoadValues();
+uint8_t TempToPot(uint16_t temp);
 
 #ifdef __cplusplus
 }

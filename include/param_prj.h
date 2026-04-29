@@ -50,26 +50,27 @@
 //Next value Id: 2013
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
-	PARAM_ENTRY(CAT_IO,    	   	Mode,       	OPMODES,    0,      1,      0,   1) \
+	PARAM_ENTRY(CAT_IO,    	   	Mode,       	OPMODES,    0,      1,      0,  1) \
 	PARAM_ENTRY(CAT_IO,        	Pot1,    		"",     	0,      255,    64, 2) \
 	PARAM_ENTRY(CAT_IO,        	Pot2,    		"",     	0,      255,    64, 3) \
 	PARAM_ENTRY(CAT_IO,        	Pot3,    		"",     	0,      255,    64, 4) \
 	PARAM_ENTRY(CAT_IO,        	Pot4,    		"",     	0,      255,    64, 5) \
-	PARAM_ENTRY(CAT_IO,        	TimeOut,    	"",     	0,      100,    60,  6) \
-	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      0,   7) \
-	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     10,   8) \
-	PARAM_ENTRY(CAT_TIM3,       Tim3_Frequency, FREQ,       1,      5,  	3,   9) \
-	PARAM_ENTRY(CAT_TIM3,       PWM3_CH3,     	OFFON,     	0,      1,      0,   10)\
-    PARAM_ENTRY(CAT_TIM3,       Tim3_3_DC,   	"",        	1,     	100, 	50,  11)\
-	PARAM_ENTRY(CAT_TIM4,       Tim4_Frequency, FREQ,       1,      5,  	3,   12)\
-	PARAM_ENTRY(CAT_TIM4,       PWM4_CH1,     	OFFON,     	0,      1,      0,   13)\
-    PARAM_ENTRY(CAT_TIM4,       Tim4_1_DC,   	"",        	1,     	100, 	50,  14)\
+	PARAM_ENTRY(CAT_IO,        	TimeOut,    	"",     	0,      100,    15, 6) \
+	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      1,  7) \
+	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     2,  8) \
+	PARAM_ENTRY(CAT_TIM3,       Tim3_Frequency, FREQ,       1,      5,  	3,  9) \
+	PARAM_ENTRY(CAT_TIM3,       PWM3_CH3,     	OFFON,     	0,      1,      0,  10)\
+    PARAM_ENTRY(CAT_TIM3,       Tim3_3_DC,   	"",        	1,     	100, 	50, 11)\
+	PARAM_ENTRY(CAT_TIM4,       Tim4_Frequency, FREQ,       1,      5,  	3,  12)\
+	PARAM_ENTRY(CAT_TIM4,       PWM4_CH1,     	OFFON,     	0,      1,      0,  13)\
+    PARAM_ENTRY(CAT_TIM4,       Tim4_1_DC,   	"",        	1,     	100, 	50, 14)\
 	VALUE_ENTRY(MODE,        	OPMODES,	2000 )\
 	VALUE_ENTRY(RunTime,      	"Sec",		2014 )\
 	VALUE_ENTRY(IGN,			OFFON, 		2001 )\
 	VALUE_ENTRY(CHARGE,			OFFON, 		2002 )\
 	VALUE_ENTRY(BMS1,			OFFON, 		2003 )\
 	VALUE_ENTRY(BMS2, 	   	   	OFFON,   	2004 )\
+	VALUE_ENTRY(CAN_T1, 	   	"C",   		2015 )\
 	VALUE_ENTRY(DigiPot1, 	   	"%",   		2005 )\
 	VALUE_ENTRY(DigiPot2, 	   	"%",   		2006 )\
 	VALUE_ENTRY(DigiPot3, 	   	"%",   		2007 )\
