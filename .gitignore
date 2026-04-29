@@ -1,4 +1,5 @@
-RaVus-Sys.bin
 RaVus-Sys
-*.o
-*.map
+linker.map
+*.bin
+*.hex
+/obj
