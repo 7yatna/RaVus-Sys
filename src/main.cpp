@@ -89,6 +89,7 @@ static CanHardware* can;
 static CanMap* canMap;
 static CanSdo* canSdo;
 
+static int counter1 = 0;
 int IGN = 0;
 int CHARGE = 0;
 int16_t Counter = 0;
@@ -108,7 +109,7 @@ static void Ms10Task(void)
 //sample 100ms task
 static void Ms100Task(void)
 {
-    int Pot_Val = 0;
+    //int Pot_Val = 0;
 	DigIo::led_out.Toggle();
     iwdg_reset();
     float cpuLoad = scheduler->GetCpuLoad();
@@ -117,10 +118,10 @@ static void Ms100Task(void)
 	CHARGE = DigIo::CHARGE.Get();
 	Param::SetInt(Param::IGN, IGN);
 	Param::SetInt(Param::CHARGE, CHARGE);
-	if (Mot_Temp < 10) Mot_Temp = 10;
-	if (Mot_Temp > 108) Mot_Temp = 108;
-	Pot_Val = TempToPot(Mot_Temp);
-	Param::SetInt(Param::Pot1, Pot_Val);
+	//if (Mot_Temp < 10) Mot_Temp = 10;
+	//if (Mot_Temp > 108) Mot_Temp = 108;
+	//Pot_Val = TempToPot(Mot_Temp);
+	//Param::SetInt(Param::Pot1, Pot_Val);
 	Param::SetInt(Param::CAN_T1, Mot_Temp);
 	if (((Param::GetInt(Param::IGN))) || ((Param::GetInt(Param::CHARGE))) || (Param::GetInt(Param::TimeOut) == 0) || (CAN_ON)) 
 	{
@@ -144,7 +145,6 @@ static void Ms100Task(void)
 	canMap->SendAll();
 	Can_Tasks();
 	LoadValues();
-	tim3_setup();
 	tim4_setup();
 }
 
@@ -205,6 +205,73 @@ void Can_Tasks()
     can->Send(0x722, bytes, 8); //Send on CAN1	
 	
 }
+
+void CH1Low1Hz()
+{
+int DC = Param::GetInt(Param::PUMP_DC);
+float onSteps = (DC * 100) / 100;
+
+  if (counter1 < onSteps) 
+	  {
+		DigIo::LOW_CH1.Set();
+	  } 
+	  else 
+	  {
+		DigIo::LOW_CH1.Clear();
+	  }
+	
+	counter1++;
+  
+  if (counter1 >= 100) 
+	  {
+		counter1 = 0; // Restart PWM cycle every 500 ms
+	  }
+}
+
+void CH1Low2Hz()
+{
+int DC = Param::GetInt(Param::PUMP_DC);
+float onSteps = (DC * 50) / 100;
+
+  if (counter1 < onSteps) 
+	  {
+		DigIo::LOW_CH1.Set();
+	  } 
+	  else 
+	  {
+		DigIo::LOW_CH1.Clear();
+	  }
+	
+	counter1++;
+  
+  if (counter1 >= 50) 
+	  {
+		counter1 = 0; // Restart PWM cycle every 500 ms
+	  }
+}
+
+void CH1Low10Hz()
+{
+int DC = Param::GetInt(Param::PUMP_DC);
+float onSteps = (DC * 10) / 100;
+
+  if (counter1 < onSteps) 
+	  {
+		DigIo::LOW_CH1.Set();
+	  } 
+	  else 
+	  {
+		DigIo::LOW_CH1.Clear();
+	  }
+	
+	counter1++;
+  
+  if (counter1 >= 10) 
+	  {
+		counter1 = 0; // Restart PWM cycle every 500 ms
+	  }
+}
+
 	
 void DecodeCAN(int id, uint32_t* data)
 {
@@ -215,7 +282,7 @@ void DecodeCAN(int id, uint32_t* data)
 			CAN_ON = bytes[0];
 			break;
 		case 0x501:
-			Mot_Temp = bytes[0];
+			Param::SetInt(Param::Pot1, bytes[0]);
 			break;
 		case 0x502:
 			Param::SetInt(Param::Pot2, bytes[0]);
@@ -226,16 +293,6 @@ void DecodeCAN(int id, uint32_t* data)
 		case 0x504:
 			Param::SetInt(Param::Pot4, bytes[0]);
 			break;
-		case 0x303:
-			Param::SetInt(Param::PWM3_CH3, bytes[0]);
-			Param::SetInt(Param::Tim3_Frequency, bytes[1]);
-			Param::SetInt(Param::Tim3_3_DC, bytes[2]);
-			break;
-		case 0x401:
-			Param::SetInt(Param::PWM4_CH1, bytes[0]);
-			Param::SetInt(Param::Tim4_Frequency, bytes[1]);
-			Param::SetInt(Param::Tim4_1_DC, bytes[2]);
-			break;	
 		default:
 			break;
 	}
@@ -252,8 +309,6 @@ static void SetCanFilters()
 	can->RegisterUserMessage(0x502); //POT2 Control Message
 	can->RegisterUserMessage(0x503); //POT3 Control Message
 	can->RegisterUserMessage(0x504); //POT4 Control Message
-	can->RegisterUserMessage(0x303); //PWM3_Ch3 Control Message
-	can->RegisterUserMessage(0x401); //PWM4_Ch1 Control Message
 	
 }
 	
@@ -274,14 +329,10 @@ void Param::Change(Param::PARAM_NUM paramNum)
 		case Param::NodeId:
 			canSdo->SetNodeId(Param::GetInt(Param::NodeId));
 			break;
-		case Param::Tim3_Frequency:
-		case Param::PWM3_CH3:
-		case Param::Tim3_3_DC:
-		case Param::Tim4_Frequency:
-		case Param::PWM4_CH1:
-		case Param::Tim4_1_DC:
+		case Param::FAN_Frequency:
+		case Param::FAN:
+		case Param::FAN_DC:
 			LoadValues();
-			tim3_setup();
 			tim4_setup();
 			break;
 		case Param::CanCtrl:

@@ -41,44 +41,14 @@
 * Start clocks of all needed peripherals
 */
 
-uint16_t Tim3_Presc;
-uint16_t Tim3_Period;
-uint32_t Tim3_3_OC;
 uint16_t Tim4_Presc;
 uint16_t Tim4_Period;
 uint32_t Tim4_1_OC;
 
 void LoadValues()
 {
-	switch (Param::GetInt(Param::Tim3_Frequency))
-	{
-		case 1:
-			Tim3_Presc = 71;
-			Tim3_Period = 10000;
-			break;
-		case 2:
-			Tim3_Presc = 63;
-			Tim3_Period = 2250;
-			break;
-		case 3:
-			Tim3_Presc = 31;
-			Tim3_Period = 2250;
-			break;
-		case 4:
-			Tim3_Presc = 9;
-			Tim3_Period = 720;
-			break;
-		case 5:
-			Tim3_Presc = 0;
-			Tim3_Period = 720;
-			break;
-		default:
-			Tim3_Presc = 63;
-			Tim3_Period = 2250;
-		break;
-	}
 	
-	switch (Param::GetInt(Param::Tim4_Frequency))
+	switch (Param::GetInt(Param::FAN_Frequency))
 	{
 		case 1:
 			Tim4_Presc = 71;
@@ -106,19 +76,10 @@ void LoadValues()
 		break;
 	}
 	
-	Param::SetInt(Param::PWM3CH3_DC, 0);
-	if (Param::GetInt(Param::PWM3_CH3)) 
+	Param::SetInt(Param::PUMP_DC, 0);
+	if (Param::GetInt(Param::FAN)) 
 	   {
-			int TIM3_3_DC = (100 - Param::GetInt(Param::Tim3_3_DC));
-			Tim3_3_OC = TIM3_3_DC*Tim3_Period;
-			Tim3_3_OC = Tim3_3_OC/100;
-			Param::SetInt(Param::PWM3CH3_DC, Tim3_3_OC);
-	   }
-	
-	Param::SetInt(Param::PWM4CH1_DC, 0);
-	if (Param::GetInt(Param::PWM4_CH1)) 
-	   {
-			int TIM4_1_DC = (100 - Param::GetInt(Param::Tim4_1_DC));
+			int TIM4_1_DC = (100 - Param::GetInt(Param::FAN_DC));
 			Tim4_1_OC = TIM4_1_DC*Tim4_Period;
 			Tim4_1_OC = Tim4_1_OC/100;
 			Param::SetInt(Param::PWM4CH1_DC, Tim4_1_OC);
@@ -224,32 +185,7 @@ void spi1_setup()   //spi 1 used for BATMAN!
    spi_set_nss_high(SPI1);
    spi_enable(SPI1);
 }
-
-void tim3_setup()
-{
-   gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);
-   timer_disable_counter(TIM3);
-   //edge aligned PWM
-   
-   timer_set_alignment(TIM3, TIM_CR1_CMS_EDGE);
-   timer_enable_preload(TIM3);
-   /* PWM mode 1 and preload enable */
-   timer_set_oc_mode(TIM3, TIM_OC3, TIM_OCM_PWM1);
-   timer_enable_oc_preload(TIM3, TIM_OC3);
-   timer_set_oc_polarity_high(TIM3, TIM_OC3);
-   timer_enable_oc_output(TIM3, TIM_OC3);
-   timer_set_period(TIM3, Tim3_Period);
-   timer_set_oc_value(TIM3, TIM_OC3, 0);
-   Param::SetInt(Param::PWM3CH3, 0);
-   if (Param::GetInt(Param::PWM3_CH3))
-   {
-	   timer_set_oc_value(TIM3, TIM_OC3, Tim3_3_OC);
-	   Param::SetInt(Param::PWM3CH3, 1);
-   }
-   timer_generate_event(TIM3, TIM_EGR_UG);
-   timer_set_prescaler(TIM3, Tim3_Presc);
-   timer_enable_counter(TIM3);
-}				 
+			 
 
 void tim4_setup()
 {
@@ -265,11 +201,11 @@ void tim4_setup()
    timer_enable_oc_output(TIM4, TIM_OC1);
    timer_set_period(TIM4, Tim4_Period);
    timer_set_oc_value(TIM4, TIM_OC1, 0);
-   Param::SetInt(Param::PWM4CH1, 0);
-   if (Param::GetInt(Param::PWM4_CH1)) 
+   Param::SetInt(Param::PWMFAN, 0);
+   if (Param::GetInt(Param::FAN)) 
    {
 	   timer_set_oc_value(TIM4, TIM_OC1, Tim4_1_OC);
-	   Param::SetInt(Param::PWM4CH1, 1);
+	   Param::SetInt(Param::PWMFAN, 1);
    }
    timer_generate_event(TIM4, TIM_EGR_UG);
    timer_set_prescaler(TIM4, Tim4_Presc);

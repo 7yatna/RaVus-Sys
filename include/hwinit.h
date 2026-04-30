@@ -30,10 +30,12 @@ void clock_setup(void);
 void nvic_setup(void);
 void rtc_setup(void);
 void spi1_setup(void);
-void tim3_setup(void);
 void tim4_setup(void);
-void write_bootloader_pininit();
+void CH1Low1Hz();
+void CH1Low2Hz();
+void CH1Low10Hz();
 
+void write_bootloader_pininit();
 void Can_Tasks();
 void DecodeCAN();
 void LoadValues();

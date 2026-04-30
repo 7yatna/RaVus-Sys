@@ -58,12 +58,12 @@
 	PARAM_ENTRY(CAT_IO,        	TimeOut,    	"",     	0,      100,    15, 6) \
 	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      1,  7) \
 	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     2,  8) \
-	PARAM_ENTRY(CAT_TIM3,       Tim3_Frequency, FREQ,       1,      5,  	3,  9) \
-	PARAM_ENTRY(CAT_TIM3,       PWM3_CH3,     	OFFON,     	0,      1,      0,  10)\
-    PARAM_ENTRY(CAT_TIM3,       Tim3_3_DC,   	"",        	1,     	100, 	50, 11)\
-	PARAM_ENTRY(CAT_TIM4,       Tim4_Frequency, FREQ,       1,      5,  	3,  12)\
-	PARAM_ENTRY(CAT_TIM4,       PWM4_CH1,     	OFFON,     	0,      1,      0,  13)\
-    PARAM_ENTRY(CAT_TIM4,       Tim4_1_DC,   	"",        	1,     	100, 	50, 14)\
+	PARAM_ENTRY(CAT_LOWPWM,     PUMP_Frequency, FREQLow,    1,      2,  	1,  9) \
+	PARAM_ENTRY(CAT_LOWPWM,     PUMP,     		OFFON,     	0,      1,      0,  10)\
+    PARAM_ENTRY(CAT_LOWPWM,     PUMP_DC,   		"",        	1,     	100, 	50, 11)\
+	PARAM_ENTRY(CAT_TIM4,     	FAN_Frequency, 	FREQ,    	0,      4,  	3,  12)\
+	PARAM_ENTRY(CAT_TIM4,     	FAN,     		OFFON,     	0,      1,      0,  13)\
+    PARAM_ENTRY(CAT_TIM4,     	FAN_DC,   		"",        	1,     	100, 	50, 14)\
 	VALUE_ENTRY(MODE,        	OPMODES,	2000 )\
 	VALUE_ENTRY(RunTime,      	"Sec",		2014 )\
 	VALUE_ENTRY(IGN,			OFFON, 		2001 )\
@@ -77,7 +77,7 @@
 	VALUE_ENTRY(DigiPot4, 	   	"%",   		2008 )\
 	VALUE_ENTRY(PWM3CH3,       	OFFON,		2009 )\
 	VALUE_ENTRY(PWM3CH3_DC,    	"Count",	2010 )\
-	VALUE_ENTRY(PWM4CH1,       	OFFON,		2011 )\
+	VALUE_ENTRY(PWMFAN,       	OFFON,		2011 )\
 	VALUE_ENTRY(PWM4CH1_DC,    	"Count",	2012 )\
 	VALUE_ENTRY(version,       	VERSTR,		2013 )\
     VALUE_ENTRY(CPU_LOAD,       "%", 		2500 )
@@ -85,10 +85,11 @@
 
 /***** Enum String definitions *****/
 #define OPMODES      "0=OFF, 1=RUN"
-#define FREQ         "1=100Hz, 2=500Hz, 3=1kHz, 4=10kHz, 5=100kHz"
+#define FREQLow      "0=1Hz, 1=2Hz, 2=10Hz"
+#define FREQ         "0=100Hz, 1=500Hz, 2=1kHz, 3=10kHz, 4=100kHz"
 #define OFFON        "0=OFF, 1=ON"
 #define CAT_IO   	 "Digital I/O Control"
-#define CAT_TIM3     "TIM 3 Control"
+#define CAT_LOWPWM   "LOW PWM"
 #define CAT_TIM4     "TIM 4 Control"
 
 #define VERSTR STRINGIFY(4=VER)
