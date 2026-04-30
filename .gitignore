@@ -3,3 +3,6 @@ linker.map
 *.bin
 *.hex
 /obj
+*.hex
+*.bin
+*.bin

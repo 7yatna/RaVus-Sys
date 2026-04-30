@@ -16,10 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <libopencm3/stm32/desig.h>
+#include <libopencm3/cm3/scb.h>
 #include "cansdo.h"
+#include "param_save.h"
 #include "my_math.h"
-#include "errormessage.h"
 
+//Some functions use the "register" keyword which C++ doesn't like
+//We can safely ignore that as we don't even use those functions
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wregister"
+#include <libopencm3/cm3/cortex.h>
+#pragma GCC diagnostic pop
+
+#define SDO_REQUEST_DOWNLOAD  (1 << 5)
+#define SDO_REQUEST_UPLOAD    (2 << 5)
+#define SDO_REQUEST_SEGMENT   (3 << 5)
+#define SDO_TOGGLE_BIT        (1 << 4)
+#define SDO_RESPONSE_UPLOAD   (2 << 5)
+#define SDO_RESPONSE_DOWNLOAD (3 << 5)
+#define SDO_EXPEDITED         (1 << 1)
+#define SDO_SIZE_SPECIFIED    (1)
+#define SDO_WRITE             (SDO_REQUEST_DOWNLOAD | SDO_EXPEDITED | SDO_SIZE_SPECIFIED)
+#define SDO_READ              SDO_REQUEST_UPLOAD
+#define SDO_ABORT             0x80
+#define SDO_WRITE_REPLY       SDO_RESPONSE_DOWNLOAD
+#define SDO_READ_REPLY        (SDO_RESPONSE_UPLOAD | SDO_EXPEDITED | SDO_SIZE_SPECIFIED)
+#define SDO_ERR_INVIDX        0x06020000
+#define SDO_ERR_RANGE         0x06090030
+#define SDO_ERR_GENERAL       0x08000000
 #define SDO_REQ_ID_BASE       0x600U
 #define SDO_REP_ID_BASE       0x580U
 
@@ -28,15 +53,17 @@
 #define SDO_INDEX_MAP_TX      0x3000
 #define SDO_INDEX_MAP_RX      0x3001
 #define SDO_INDEX_MAP_RD      0x3100
+#define SDO_INDEX_SERIAL      0x5000
 #define SDO_INDEX_STRINGS     0x5001
-#define SDO_INDEX_ERROR_NUM   0x5003
-#define SDO_INDEX_ERROR_TIME  0x5004
-
+#define SDO_INDEX_COMMANDS    0x5002
+#define SDO_CMD_SAVE          0
+#define SDO_CMD_LOAD          1
+#define SDO_CMD_RESET         2
+#define SDO_CMD_DEFAULTS      3
 
 #define PRINT_BUF_ENQUEUE(c)  printBuffer[(printByteIn++) & (sizeof(printBuffer) - 1)] = c
 #define PRINT_BUF_DEQUEUE()   printBuffer[(printByteOut++) & (sizeof(printBuffer) - 1)]
 #define PRINT_BUF_EMPTY()     ((printByteOut - printByteIn) == sizeof(printBuffer))
-#define PRINT_TIMEOUT         1000
 
 /** \brief
  *
@@ -45,10 +72,7 @@
  *
  */
 CanSdo::CanSdo(CanHardware* hw, CanMap* cm)
- : canHardware(hw), canMap(cm), nodeId(1), remoteNodeId(255), printRequest(-1),
-   printByteIn(0), printByteOut(sizeof(printBuffer)), printTimeout(PRINT_TIMEOUT),
-   mapParam(Param::PARAM_INVALID), mapId(0), sdoReplyValid(false), sdoReplyData(0),
-   pendingUserSpaceSdo(false)
+ : canHardware(hw), canMap(cm), nodeId(1), remoteNodeId(255), printRequest(-1), saveEnabled(true)
 {
    canHardware->AddCallback(this);
    HandleClear();
@@ -71,17 +95,8 @@ void CanSdo::HandleRx(uint32_t canId, uint32_t data[2], uint8_t)
    }
    else if (canId == (SDO_REP_ID_BASE + remoteNodeId))
    {
-      SdoFrame* sdoFrame = (SdoFrame*)data;
-      if (sdoFrame->index == SDO_INDEX_MAP_RX || sdoFrame->index == SDO_INDEX_MAP_TX)
-      {
-         if (sdoFrame->subIndex == 0)
-            InitiateSDOTransfer(SDO_WRITE, remoteNodeId, sdoFrame->index, 1, mapInfo.mapParam | (mapInfo.offsetBits << 16) | (mapInfo.numBits << 24));
-         else if (sdoFrame->subIndex == 1)
-            InitiateSDOTransfer(SDO_WRITE, remoteNodeId, sdoFrame->index, 2, (int32_t)(mapInfo.gain * 1000.0f) | (mapInfo.offset << 24));
-      }
-      sdoReplyValid = sdoFrame->cmd != SDO_ABORT;
-      sdoReplyData = sdoFrame->data;
-      //TODO: check indexes against request in case there are stray SDO replies
+      sdoReplyValid = (data[0] & 0xFF) != SDO_ABORT;
+      sdoReplyData = data[1];
    }
 }
 
@@ -101,13 +116,6 @@ bool CanSdo::SDOReadReply(uint32_t& data)
    return sdoReplyValid;
 }
 
-void CanSdo::RemoteMap(uint8_t nodeId, bool rx, uint32_t cobId, CanMap::CANPOS mapping)
-{
-   mapInfo = mapping;
-
-   InitiateSDOTransfer(SDO_WRITE, nodeId, rx ? SDO_INDEX_MAP_RX : SDO_INDEX_MAP_TX, 0, cobId);
-}
-
 void CanSdo::SetNodeId(uint8_t id)
 {
    nodeId = id;
@@ -117,7 +125,7 @@ void CanSdo::SetNodeId(uint8_t id)
 void CanSdo::InitiateSDOTransfer(uint8_t req, uint8_t nodeId, uint16_t index, uint8_t subIndex, uint32_t data)
 {
    uint32_t d[2];
-   SdoFrame *sdo = (SdoFrame*)d;
+   CAN_SDO *sdo = (CAN_SDO*)d;
 
    sdo->cmd = req;
    sdo->index = index;
@@ -138,7 +146,7 @@ void CanSdo::InitiateSDOTransfer(uint8_t req, uint8_t nodeId, uint16_t index, ui
 //http://www.byteme.org.uk/canopenparent/canopen/sdo-service-data-objects-canopen/
 void CanSdo::ProcessSDO(uint32_t data[2])
 {
-   SdoFrame *sdo = (SdoFrame*)data;
+   CAN_SDO *sdo = (CAN_SDO*)data;
 
    if ((sdo->cmd & SDO_REQUEST_SEGMENT) == SDO_REQUEST_SEGMENT)
    {
@@ -204,103 +212,104 @@ void CanSdo::ProcessSDO(uint32_t data[2])
    {
       ReadOrDeleteCanMap(sdo);
    }
-   else if (sdo->index == SDO_INDEX_ERROR_NUM)
-   {
-      if (sdo->cmd == SDO_READ)
-      {
-         sdo->data = ErrorMessage::GetErrorNum(sdo->subIndex);
-         sdo->cmd = SDO_READ_REPLY;
-      }
-      else
-      {
-         sdo->cmd = SDO_ABORT;
-         sdo->data = SDO_ERR_INVIDX;
-      }
-   }
-   else if (sdo->index == SDO_INDEX_ERROR_TIME)
-   {
-      if (sdo->cmd == SDO_READ)
-      {
-         sdo->data = ErrorMessage::GetErrorTime(sdo->subIndex);
-         sdo->cmd = SDO_READ_REPLY;
-      }
-      else
-      {
-         sdo->cmd = SDO_ABORT;
-         sdo->data = SDO_ERR_INVIDX;
-      }
-   }
    else
    {
-      if (!ProcessSpecialSDOObjects(sdo))
-         return; //Don't send reply when handled by user space
+      ProcessSpecialSDOObjects(sdo);
    }
    canHardware->Send(0x580 + nodeId, data);
 }
 
-/** \brief count down PutChar character send timeout
- *
- * \param callingFrequency in ms. This is subtracted from the remaining wait time
- * \return void
- *
- */
-void CanSdo::TriggerTimeout(int callingFrequency)
-{
-   if (printTimeout > 0)
-   {
-      printTimeout -= callingFrequency;
-   }
-   if (printTimeout < 0)
-   {
-      printTimeout = 0;
-   }
-}
-
 void CanSdo::PutChar(char c)
 {
-   if (printTimeout == 0) return; //last call to PutChar resulted in a timeout. Do not recover until the next burst
-
-   printTimeout = PRINT_TIMEOUT;
    //When print buffer is full, wait
-   while (printByteIn == printByteOut && printTimeout > 0);
+   while (printByteIn == printByteOut);
 
    PRINT_BUF_ENQUEUE(c);
    printRequest = -1; //We can clear the print start trigger as we've obviously started printing
 }
 
-void CanSdo::SendSdoReply(SdoFrame* sdoFrame)
+void CanSdo::ProcessSpecialSDOObjects(CAN_SDO* sdo)
 {
-   canHardware->Send(0x580 + nodeId, (uint32_t*)sdoFrame);
-   pendingUserSpaceSdo = false;
-}
-
-bool CanSdo::ProcessSpecialSDOObjects(SdoFrame* sdo)
-{
-   if (sdo->index == SDO_INDEX_STRINGS)
+   if (sdo->index == SDO_INDEX_SERIAL && sdo->cmd == SDO_READ)
+   {
+      sdo->cmd = SDO_READ_REPLY;
+      switch (sdo->subIndex)
+      {
+      case 0:
+         sdo->data = DESIG_UNIQUE_ID0;
+         break;
+      case 1:
+         sdo->data = DESIG_UNIQUE_ID1;
+         break;
+      case 2:
+         sdo->data = DESIG_UNIQUE_ID2;
+         break;
+      case 3:
+         sdo->data = Param::GetIdSum();
+         break;
+      default:
+         sdo->cmd = SDO_ABORT;
+         sdo->data = SDO_ERR_INVIDX;
+      }
+   }
+   else if (sdo->index == SDO_INDEX_STRINGS)
    {
       if (sdo->cmd == SDO_READ)
       {
          sdo->data = 65535; //this should be the size of JSON but we don't know this in advance. Hmm.
          sdo->cmd = SDO_RESPONSE_UPLOAD | SDO_SIZE_SPECIFIED;
-         printTimeout = PRINT_TIMEOUT;
          printByteIn = 0;
          printByteOut = sizeof(printBuffer); //both point to the beginning of the physical buffer but virtually they are 64 bytes apart
          printRequest = sdo->subIndex;
-         return true;
+      }
+   }
+   else if (sdo->index == SDO_INDEX_COMMANDS && sdo->cmd == SDO_WRITE)
+   {
+      sdo->cmd = SDO_WRITE_REPLY;
+
+      switch (sdo->subIndex)
+      {
+      case SDO_CMD_SAVE:
+         if (saveEnabled)
+         {
+            cm_disable_interrupts();
+            if (0 != canMap) canMap->Save();
+            parm_save();
+            cm_enable_interrupts();
+         }
+         else
+         {
+            sdo->cmd = SDO_ABORT;
+            sdo->data = SDO_ERR_GENERAL;
+         }
+         break;
+      case SDO_CMD_LOAD:
+         //We disable interrupts to prevent concurrent access of the CRC unit
+         cm_disable_interrupts();
+         parm_load();
+         cm_enable_interrupts();
+         Param::Change(Param::PARAM_LAST);
+         break;
+      case SDO_CMD_RESET:
+         scb_reset_system();
+         break;
+      case SDO_CMD_DEFAULTS:
+         Param::LoadDefaults();
+         Param::Change(Param::PARAM_LAST);
+         break;
+      default:
+         sdo->cmd = SDO_ABORT;
+         sdo->data = SDO_ERR_INVIDX;
       }
    }
    else
    {
-      pendingUserSpaceSdo = true;
-      pendingUserSpaceSdoFrame.cmd = sdo->cmd;
-      pendingUserSpaceSdoFrame.index = sdo->index;
-      pendingUserSpaceSdoFrame.subIndex = sdo->subIndex;
-      pendingUserSpaceSdoFrame.data = sdo->data;
+      sdo->cmd = SDO_ABORT;
+      sdo->data = SDO_ERR_INVIDX;
    }
-   return false;
 }
 
-void CanSdo::ReadOrDeleteCanMap(SdoFrame* sdo)
+void CanSdo::ReadOrDeleteCanMap(CAN_SDO* sdo)
 {
    bool rx = (sdo->index & 0x80) != 0;
    uint32_t canId;
@@ -330,7 +339,6 @@ void CanSdo::ReadOrDeleteCanMap(SdoFrame* sdo)
    else if (sdo->cmd == SDO_WRITE && canPos != 0 && sdo->data == 0)
    {
       canMap->Remove(rx, sdo->index & 0x3f, itemIdx);
-      sdo->cmd = SDO_WRITE_REPLY;
    }
    else
    {
@@ -339,7 +347,7 @@ void CanSdo::ReadOrDeleteCanMap(SdoFrame* sdo)
    }
 }
 
-void CanSdo::AddCanMap(SdoFrame* sdo, bool rx)
+void CanSdo::AddCanMap(CAN_SDO* sdo, bool rx)
 {
    if (sdo->cmd == SDO_WRITE)
    {

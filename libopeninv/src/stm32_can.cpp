@@ -28,14 +28,6 @@
 #include <libopencm3/cm3/common.h>
 #include <libopencm3/cm3/nvic.h>
 #include "stm32_can.h"
-#include "cortex.h"
-
-//Some functions use the "register" keyword which C++ doesn't like
-//We can safely ignore that as we don't even use those functions
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wregister"
-#include <libopencm3/cm3/cortex.h>
-#pragma GCC diagnostic pop
 
 #define MAX_INTERFACES        2
 #define IDS_PER_BANK          4
@@ -44,21 +36,6 @@
 #ifndef CAN_PERIPH_SPEED
 #define CAN_PERIPH_SPEED 36
 #endif // CAN_PERIPH_SPEED
-
-// To allow concurrent sending of CAN frames from different contexts we need to
-// disable interrupts. Some projects have hard realtime requirements which mean
-// we cannot disable all interrupts. These projects should define the highest
-// interrupt priority users of the CAN interface here. If not defined we assume
-// that all interrupts can be disabled.
-//
-// CAN_MAX_IRQ_PRIORITY should match the priority passed to nvic_set_priority()
-#ifdef CAN_MAX_IRQ_PRIORITY
-#define DISABLE_CAN_USER_INTERRUPTS()  cm_set_basepriority(CAN_MAX_IRQ_PRIORITY);
-#define ENABLE_CAN_USER_INTERRUPTS()   cm_set_basepriority(CM_BASEPRI_ENABLE_INTERRUPTS);
-#else
-#define DISABLE_CAN_USER_INTERRUPTS()  cm_disable_interrupts()
-#define ENABLE_CAN_USER_INTERRUPTS()   cm_enable_interrupts()
-#endif // CAN_MAX_IRQ_PRIORITY
 
 struct CANSPEED
 {
@@ -70,21 +47,13 @@ struct CANSPEED
 Stm32Can* Stm32Can::interfaces[MAX_INTERFACES];
 
 static const CANSPEED canSpeed[CanHardware::BaudLast] =
-#if CAN_PERIPH_SPEED == 16
-{
-   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 8 }, //125kbps at 16 MHz
-   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 4 }, //250kbps at 16 MHz
-   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 2 }, //500kbps at 16 MHz
-   { CAN_BTR_TS1_8TQ,  CAN_BTR_TS2_1TQ, 2 }, //800kbps at 16 MHz
-   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 1 }, //1000kbps at 36 MHz
-};
-#elif CAN_PERIPH_SPEED == 32
+#if CAN_PERIPH_SPEED == 32
 {
    { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 16}, //125kbps at 32 MHz
    { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 8 }, //250kbps at 32 MHz
    { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 4 }, //500kbps at 32 MHz
-   { CAN_BTR_TS1_8TQ,  CAN_BTR_TS2_1TQ, 4 }, //800kbps at 32 MHz
-   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 2 }, //1000kbps at 32 MHz
+   { CAN_BTR_TS1_6TQ, CAN_BTR_TS2_1TQ, 5 }, //800kbps at 36 MHz
+   { CAN_BTR_TS1_13TQ, CAN_BTR_TS2_2TQ, 2 }, //1000kbps at 36 MHz
 };
 #elif CAN_PERIPH_SPEED == 36
 {
@@ -221,8 +190,6 @@ void Stm32Can::SetBaudrate(enum baudrates baudrate)
  */
 void Stm32Can::Send(uint32_t canId, uint32_t data[2], uint8_t len)
 {
-   DISABLE_CAN_USER_INTERRUPTS();
-
    can_disable_irq(canDev, CAN_IER_TMEIE);
 
    if (can_transmit(canDev, canId, canId > 0x7FF, false, len, (uint8_t*)data) < 0 && sendCnt < SENDBUFFER_LEN)
@@ -239,9 +206,8 @@ void Stm32Can::Send(uint32_t canId, uint32_t data[2], uint8_t len)
    {
       can_enable_irq(canDev, CAN_IER_TMEIE);
    }
-
-   ENABLE_CAN_USER_INTERRUPTS();
 }
+
 
 Stm32Can* Stm32Can::GetInterface(int index)
 {
