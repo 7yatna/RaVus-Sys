@@ -76,13 +76,13 @@ void LoadValues()
 		break;
 	}
 	
-	Param::SetInt(Param::PUMP_DC, 0);
+	Param::SetInt(Param::Fan_DC, 0);
 	if (Param::GetInt(Param::FAN)) 
 	   {
 			int TIM4_1_DC = (100 - Param::GetInt(Param::FAN_DC));
 			Tim4_1_OC = TIM4_1_DC*Tim4_Period;
 			Tim4_1_OC = Tim4_1_OC/100;
-			Param::SetInt(Param::PWM4CH1_DC, Tim4_1_OC);
+			Param::SetInt(Param::Fan_DC, Tim4_1_OC);
 	   }
 }
 

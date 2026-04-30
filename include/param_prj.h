@@ -57,13 +57,13 @@
 	PARAM_ENTRY(CAT_IO,        	Pot4,    		"",     	0,      255,    64, 5) \
 	PARAM_ENTRY(CAT_IO,        	TimeOut,    	"",     	0,      100,    15, 6) \
 	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      1,  7) \
-	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     2,  8) \
-	PARAM_ENTRY(CAT_LOWPWM,     PUMP_Frequency, FREQLow,    1,      2,  	1,  9) \
-	PARAM_ENTRY(CAT_LOWPWM,     PUMP,     		OFFON,     	0,      1,      0,  10)\
-    PARAM_ENTRY(CAT_LOWPWM,     PUMP_DC,   		"",        	1,     	100, 	50, 11)\
-	PARAM_ENTRY(CAT_TIM4,     	FAN_Frequency, 	FREQ,    	0,      4,  	3,  12)\
-	PARAM_ENTRY(CAT_TIM4,     	FAN,     		OFFON,     	0,      1,      0,  13)\
-    PARAM_ENTRY(CAT_TIM4,     	FAN_DC,   		"",        	1,     	100, 	50, 14)\
+	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     4,  8) \
+	PARAM_ENTRY(CAT_PUMPPWM,    PUMP_Frequency, FREQLow,    0,      2,  	1,  9) \
+	PARAM_ENTRY(CAT_PUMPPWM,    PUMP,     		OFFON,     	0,      1,      0,  10)\
+    PARAM_ENTRY(CAT_PUMPPWM,    PUMP_DC,   		"",        	10,     80, 	10, 11)\
+	PARAM_ENTRY(CAT_FANPWM ,    FAN_Frequency, 	FREQ,    	0,      4,  	3,  12)\
+	PARAM_ENTRY(CAT_FANPWM ,    FAN,     		OFFON,     	0,      1,      0,  13)\
+    PARAM_ENTRY(CAT_FANPWM ,    FAN_DC,   		"",        	1,     	100, 	50, 14)\
 	VALUE_ENTRY(MODE,        	OPMODES,	2000 )\
 	VALUE_ENTRY(RunTime,      	"Sec",		2014 )\
 	VALUE_ENTRY(IGN,			OFFON, 		2001 )\
@@ -75,10 +75,10 @@
 	VALUE_ENTRY(DigiPot2, 	   	"%",   		2006 )\
 	VALUE_ENTRY(DigiPot3, 	   	"%",   		2007 )\
 	VALUE_ENTRY(DigiPot4, 	   	"%",   		2008 )\
-	VALUE_ENTRY(PWM3CH3,       	OFFON,		2009 )\
-	VALUE_ENTRY(PWM3CH3_DC,    	"Count",	2010 )\
+	VALUE_ENTRY(PWMPUMP,       	OFFON,		2009 )\
+	VALUE_ENTRY(Pump_DC,    	"Count",	2010 )\
 	VALUE_ENTRY(PWMFAN,       	OFFON,		2011 )\
-	VALUE_ENTRY(PWM4CH1_DC,    	"Count",	2012 )\
+	VALUE_ENTRY(Fan_DC,    		"Count",	2012 )\
 	VALUE_ENTRY(version,       	VERSTR,		2013 )\
     VALUE_ENTRY(CPU_LOAD,       "%", 		2500 )
 
@@ -89,8 +89,8 @@
 #define FREQ         "0=100Hz, 1=500Hz, 2=1kHz, 3=10kHz, 4=100kHz"
 #define OFFON        "0=OFF, 1=ON"
 #define CAT_IO   	 "Digital I/O Control"
-#define CAT_LOWPWM   "LOW PWM"
-#define CAT_TIM4     "TIM 4 Control"
+#define CAT_PUMPPWM  "PUMP PWM"
+#define CAT_FANPWM   "FAN PWM"
 
 #define VERSTR STRINGIFY(4=VER)
 

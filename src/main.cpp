@@ -103,6 +103,35 @@ static void Ms10Task(void)
 	Param::SetInt(Param::MODE, (Param::GetInt(Param::Mode)));
 	if (Param::GetInt(Param::Mode)) Counter = 0;
 	Param::SetInt(Param::RunTime, (Counter/5));
+	switch (Param::GetInt(Param::PUMP))
+	{
+		case 1:
+			{
+				Param::SetInt(Param::PWMPUMP, 1);
+				Param::SetInt(Param::Pump_DC, Param::GetInt(Param::PUMP_DC));
+				switch (Param::GetInt(Param::PUMP_Frequency))
+					{
+						case 0:
+							CH1Low1Hz();
+							break;
+						case 1:
+							CH1Low2Hz();
+							break;
+						case 2:
+							CH1Low10Hz();
+							break;
+					default:
+						//Handle general parameter changes here. Add paramNum labels for handling specific parameters
+					break;
+					}
+			}
+			break;
+		default:
+			Param::SetInt(Param::PWMPUMP, 0);
+			Param::SetInt(Param::PUMP_DC, 0);
+			DigIo::LOW_CH1.Clear();
+		break;
+	}
 }
 
 
