@@ -14,6 +14,8 @@
 
 //Here you specify a list of analog inputs, see main.cpp on how to use them
 #define ANA_IN_LIST \
+   ANA_IN_ENTRY(GP_analog1,GPIOA, 0) \
+   ANA_IN_ENTRY(GP_analog2,GPIOA, 1) \
    ANA_IN_ENTRY(dummyAnal, GPIOC, 11) \
    
 

@@ -49,60 +49,22 @@ extern "C" void __cxa_pure_virtual()
     while (1);
 }
 
-typedef struct 
-	{
-		uint16_t temp;   // °C
-		uint8_t  pot;    // 0–255
-	} TempPotLUT;
-static const TempPotLUT lut[] = 
-	{
-		{ 10,  150},
-		{ 20,  140},
-		{ 21,  130},
-		{ 22,  120},
-		{ 25,  110},
-		{ 27,  100},
-		{ 28,  95 },
-		{ 29,  90 },
-		{ 30,  85 },
-		{ 31,  80 },
-		{ 32,  75 },
-		{ 35,  70 },
-		{ 38,  65 },
-		{ 39,  60 },
-		{ 40,  55 },
-		{ 41,  50 },
-		{ 43,  45 },
-		{ 48,  40 },
-		{ 50,  35 },
-		{ 52,  30 },
-		{ 59,  25 },
-		{ 60,  20 },
-		{ 63,  15 },
-		{ 72,  10 },
-		{ 81,  5 },
-		{108,  0 }
-	};
-
 static Stm32Scheduler* scheduler;
 static CanHardware* can;
 static CanMap* canMap;
 static CanSdo* canSdo;
 
 static int counter1 = 0;
-int IGN = 0;
-int CHARGE = 0;
-int16_t Counter = 0;
 int CAN_ON = 0;
 int Mot_Temp = 0;
+int Ac_Req = 0;
+int HTR_Req = 0;
 
 static void Ms10Task(void)
 {
     //Set timestamp of error message
     ErrorMessage::SetTime(rtc_get_counter_val());
 	Param::SetInt(Param::MODE, (Param::GetInt(Param::Mode)));
-	if (Param::GetInt(Param::Mode)) Counter = 0;
-	Param::SetInt(Param::RunTime, (Counter/5));
 	switch (Param::GetInt(Param::PUMP))
 	{
 		case 1:
@@ -138,39 +100,64 @@ static void Ms10Task(void)
 //sample 100ms task
 static void Ms100Task(void)
 {
-    //int Pot_Val = 0;
+	int opmode = Param::GetInt(Param::MODE);
 	DigIo::led_out.Toggle();
     iwdg_reset();
     float cpuLoad = scheduler->GetCpuLoad();
     Param::SetFloat(Param::CPU_LOAD, cpuLoad / 10);
-	IGN = DigIo::IGN.Get();
-	CHARGE = DigIo::CHARGE.Get();
-	Param::SetInt(Param::IGN, IGN);
-	Param::SetInt(Param::CHARGE, CHARGE);
-	//if (Mot_Temp < 10) Mot_Temp = 10;
-	//if (Mot_Temp > 108) Mot_Temp = 108;
-	//Pot_Val = TempToPot(Mot_Temp);
-	//Param::SetInt(Param::Pot1, Pot_Val);
-	Param::SetInt(Param::CAN_T1, Mot_Temp);
-	if (((Param::GetInt(Param::IGN))) || ((Param::GetInt(Param::CHARGE))) || (Param::GetInt(Param::TimeOut) == 0) || (CAN_ON)) 
-	{
-		Param::SetInt(Param::Mode, 1);
-		DigIo::BMS1.Set();
-		DigIo::BMS2.Set();
-		Param::SetInt(Param::BMS1, 1);
-		Param::SetInt(Param::BMS2, 1);
-	}
-	else 
-	{
-		Param::SetInt(Param::Mode, 0);
-		if (((Param::GetInt(Param::RunTime))/60) >= (Param::GetInt(Param::TimeOut)))
+	int GP1_IN = AnaIn::GP_analog1.Get();
+	int GP2_IN = AnaIn::GP_analog2.Get();
+	Param::SetInt(Param::GP1, GP1_IN);
+	Param::SetInt(Param::GP2, GP2_IN);
+	if (Mot_Temp <= 10) Mot_Temp = 10;
+	if (Mot_Temp > 100) Mot_Temp = 100;
+	Mot_Temp = Param::GetInt(Param::CAN_MotTemp);
+	if(opmode==MOD_CHARGE || opmode==MOD_RUN)
+	{	
+		Param::SetInt(Param::PUMP, 1);
+		Param::SetInt(Param::PUMP_Frequency,1);
+		int PumpDC = utils::change(Mot_Temp, 25, 55, 44, 80);
+		if (PumpDC <= 44) PumpDC = 44;
+		if (PumpDC > 80) PumpDC = 80;
+		Param::SetInt(Param::PUMP_DC, PumpDC);
+		Param::SetInt(Param::FAN_Frequency,1);
+		int FanDC = utils::change(Mot_Temp, 40, 60, 45, 98);
+		if (FanDC <= 45) FanDC = 45;
+		if (FanDC > 98) FanDC = 98;
+		if (Param::GetInt(Param::CAN_AC)) FanDC = 98;
+		if ((Mot_Temp >= 40) || (Param::GetInt(Param::CAN_AC))) Param::SetInt(Param::FAN_DC, FanDC);
+		else Param::SetInt(Param::FAN_DC, 15);
+		if (Param::GetInt(Param::CAN_HTR)) 
 		{
-			DigIo::BMS1.Clear();
-			DigIo::BMS2.Clear();
-			Param::SetInt(Param::BMS1, 0);
-			Param::SetInt(Param::BMS2, 0);
+			DigIo::Out1.Set();
+			Param::SetInt(Param::Out1, 1);
+			DigIo::Out2.Set();
+			Param::SetInt(Param::Out2, 1);
+		}
+		else
+		{
+			DigIo::Out1.Clear();
+			Param::SetInt(Param::Out1, 0);
+			DigIo::Out2.Clear();
+			Param::SetInt(Param::Out2, 0);
 		}
 	}
+	
+	if(opmode==0)
+	{
+		Param::SetInt(Param::PUMP, 1);
+		Param::SetInt(Param::PUMP_Frequency,1);
+		Param::SetInt(Param::PUMP_DC, 10);
+		Param::SetInt(Param::FAN, 1);
+		Param::SetInt(Param::FAN_Frequency,1);
+		Param::SetInt(Param::FAN_DC, 15);
+		DigIo::Out1.Clear();
+		Param::SetInt(Param::Out1, 0);
+		DigIo::Out2.Clear();
+		Param::SetInt(Param::Out2, 0);
+	}
+		
+
 	canMap->SendAll();
 	Can_Tasks();
 	LoadValues();
@@ -184,53 +171,15 @@ static void Ms200Task(void)
 	DigiPot::SetPot2Step();
 	DigiPot::SetPot3Step();
 	DigiPot::SetPot4Step();
-	Counter++;
 	CAN_ON = 0;
+	Param::SetInt(Param::CAN_MotTemp, 0);
+	Param::SetInt(Param::CAN_AC, 0);
+	Param::SetInt(Param::CAN_HTR, 0);
 }
 
-uint8_t TempToPot(uint16_t temp)
-{
-    /* Clamp */
-    if (temp <= lut[0].temp)
-        return lut[0].pot;
-
-    if (temp >= lut[sizeof(lut)/sizeof(lut[0]) - 1].temp)
-        return lut[sizeof(lut)/sizeof(lut[0]) - 1].pot;
-
-    /* Find segment */
-    for (uint32_t i = 0; i < (sizeof(lut)/sizeof(lut[0]) - 1); i++)
-    {
-        uint16_t t1 = lut[i].temp;
-        uint16_t t2 = lut[i + 1].temp;
-
-        if (temp >= t1 && temp <= t2)
-        {
-            int16_t p1 = lut[i].pot;
-            int16_t p2 = lut[i + 1].pot;
-
-            /* Linear interpolation */
-            return (uint8_t)(
-                p1 + (int32_t)(temp - t1) * (p2 - p1) / (t2 - t1)
-            );
-        }
-    }
-
-    return 0; /* should never happen */
-}
 
 void Can_Tasks()
 {	
-	uint8_t bytes[8];
-    bytes[0]= (Param::GetInt(Param::Mode));
-    bytes[1]= ((Counter/5) >> 8);
-    bytes[2]= Counter/5;
-	bytes[3]= (Param::GetInt(Param::Pot1));
-	bytes[4]= (Param::GetInt(Param::Pot2));
-	bytes[5]= (Param::GetInt(Param::Pot3));
-	bytes[6]= (Param::GetInt(Param::Pot4));
-	bytes[7]= 0x00;
-    
-    can->Send(0x722, bytes, 8); //Send on CAN1	
 	
 }
 
@@ -320,16 +269,13 @@ void DecodeCAN(int id, uint32_t* data)
 			CAN_ON = bytes[0];
 			break;
 		case 0x501:
-			Param::SetInt(Param::Pot1, bytes[0]);
+			Param::SetInt(Param::CAN_MotTemp, bytes[0]);
 			break;
 		case 0x502:
-			Param::SetInt(Param::Pot2, bytes[0]);
+			Param::SetInt(Param::CAN_AC, bytes[0]);
 			break;
 		case 0x503:
-			Param::SetInt(Param::Pot3, bytes[0]);
-			break;
-		case 0x504:
-			Param::SetInt(Param::Pot4, bytes[0]);
+			Param::SetInt(Param::CAN_HTR, bytes[0]);
 			break;
 		default:
 			break;
@@ -343,10 +289,9 @@ static void SetCanFilters()
 {
 	can->RegisterUserMessage(0x605); //Can SDO
 	can->RegisterUserMessage(0x1AE); //OI Control Message
-	can->RegisterUserMessage(0x501); //POT1 Control Message
-	can->RegisterUserMessage(0x502); //POT2 Control Message
-	can->RegisterUserMessage(0x503); //POT3 Control Message
-	can->RegisterUserMessage(0x504); //POT4 Control Message
+	can->RegisterUserMessage(0x501); //OI Control Message
+	can->RegisterUserMessage(0x502); //OI Control Message
+	can->RegisterUserMessage(0x503); //OI Control Message
 	
 }
 	
@@ -429,6 +374,7 @@ extern "C" int main(void)
 	DigIo::POT_CS.Set();
 	LoadValues();
 	SetCanFilters();
+	Param::SetInt(Param::MODE, MOD_OFF);
 
     while(1)
     {

@@ -7,3 +7,11 @@ linker.map
 *.bin
 *.bin
 /obj
+obj/terminalcommands.o
+obj/terminal_prj.o
+obj/params.o
+obj/param_save.o
+obj/params.o
+obj/terminal_prj.o
+obj/main.o
+obj/hwinit.o

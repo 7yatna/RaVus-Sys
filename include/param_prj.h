@@ -50,42 +50,42 @@
 //Next value Id: 2013
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
-	PARAM_ENTRY(CAT_IO,    	   	Mode,       	OPMODES,    0,      1,      0,  1) \
-	PARAM_ENTRY(CAT_IO,        	Pot1,    		"",     	0,      255,    64, 2) \
-	PARAM_ENTRY(CAT_IO,        	Pot2,    		"",     	0,      255,    64, 3) \
-	PARAM_ENTRY(CAT_IO,        	Pot3,    		"",     	0,      255,    64, 4) \
-	PARAM_ENTRY(CAT_IO,        	Pot4,    		"",     	0,      255,    64, 5) \
-	PARAM_ENTRY(CAT_IO,        	TimeOut,    	"",     	0,      100,    15, 6) \
-	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      1,  7) \
-	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     4,  8) \
-	PARAM_ENTRY(CAT_PUMPPWM,    PUMP_Frequency, FREQLow,    0,      2,  	1,  9) \
-	PARAM_ENTRY(CAT_PUMPPWM,    PUMP,     		OFFON,     	0,      1,      0,  10)\
-    PARAM_ENTRY(CAT_PUMPPWM,    PUMP_DC,   		"",        	10,     80, 	10, 11)\
-	PARAM_ENTRY(CAT_FANPWM ,    FAN_Frequency, 	FREQ,    	0,      4,  	3,  12)\
-	PARAM_ENTRY(CAT_FANPWM ,    FAN,     		OFFON,     	0,      1,      0,  13)\
-    PARAM_ENTRY(CAT_FANPWM ,    FAN_DC,   		"",        	1,     	100, 	50, 14)\
-	PARAM_ENTRY(CAT_IO,         SOC,     		"",     	0,      100,    100,15) \
+	PARAM_ENTRY(CAT_IO,    	   	Mode,       	OPMODES,    0,      4,      0,  	1) \
+	PARAM_ENTRY(CAT_IO,         SOC,     		"",     	0,      100,    100,	2) \
+	PARAM_ENTRY(CAT_IO,        	Pot1,    		"",     	0,      255,    64, 	3) \
+	PARAM_ENTRY(CAT_IO,        	Pot2,    		"",     	0,      255,    64, 	4) \
+	PARAM_ENTRY(CAT_IO,        	Pot3,    		"",     	0,      255,    64, 	5) \
+	PARAM_ENTRY(CAT_IO,        	Pot4,    		"",     	0,      255,    64, 	6) \
+	PARAM_ENTRY(CAT_IO,        	CanCtrl,    	OFFON,     	0,      1,      1,  	7) \
+	PARAM_ENTRY(CAT_IO,         NodeId,     	"",     	1,      63,     4,  	8) \
+	PARAM_ENTRY(CAT_PUMPPWM,    PUMP_Frequency, FREQLow,    0,      2,  	1,  	9) \
+	PARAM_ENTRY(CAT_PUMPPWM,    PUMP,     		OFFON,     	0,      1,      1,  	10)\
+    PARAM_ENTRY(CAT_PUMPPWM,    PUMP_DC,   		"",        	10,     80, 	10, 	11)\
+	PARAM_ENTRY(CAT_FANPWM ,    FAN_Frequency, 	FREQ,    	0,      4,  	3,  	12)\
+	PARAM_ENTRY(CAT_FANPWM ,    FAN,     		OFFON,     	0,      1,      1,  	13)\
+    PARAM_ENTRY(CAT_FANPWM ,    FAN_DC,   		"",        	10,     98, 	18, 	14)\
 	VALUE_ENTRY(MODE,        	OPMODES,	2000 )\
-	VALUE_ENTRY(RunTime,      	"Sec",		2014 )\
-	VALUE_ENTRY(IGN,			OFFON, 		2001 )\
-	VALUE_ENTRY(CHARGE,			OFFON, 		2002 )\
-	VALUE_ENTRY(BMS1,			OFFON, 		2003 )\
-	VALUE_ENTRY(BMS2, 	   	   	OFFON,   	2004 )\
-	VALUE_ENTRY(CAN_T1, 	   	"C",   		2015 )\
-	VALUE_ENTRY(DigiPot1, 	   	"%",   		2005 )\
-	VALUE_ENTRY(DigiPot2, 	   	"%",   		2006 )\
-	VALUE_ENTRY(DigiPot3, 	   	"%",   		2007 )\
-	VALUE_ENTRY(DigiPot4, 	   	"%",   		2008 )\
-	VALUE_ENTRY(PWMPUMP,       	OFFON,		2009 )\
-	VALUE_ENTRY(Pump_DC,    	"Count",	2010 )\
-	VALUE_ENTRY(PWMFAN,       	OFFON,		2011 )\
-	VALUE_ENTRY(Fan_DC,    		"Count",	2012 )\
-	VALUE_ENTRY(version,       	VERSTR,		2013 )\
+	VALUE_ENTRY(GP1,			"", 		2001 )\
+	VALUE_ENTRY(GP2,			"", 		2002 )\
+	VALUE_ENTRY(Out1,			OFFON, 		2003 )\
+	VALUE_ENTRY(Out2, 	   	   	OFFON,   	2004 )\
+	VALUE_ENTRY(CAN_MotTemp, 	"C",   		2005 )\
+	VALUE_ENTRY(CAN_AC, 	   	OFFON,   	2006 )\
+	VALUE_ENTRY(CAN_HTR, 	   	OFFON,   	2007 )\
+	VALUE_ENTRY(DigiPot1, 	   	"%",   		2008 )\
+	VALUE_ENTRY(DigiPot2, 	   	"%",   		2009 )\
+	VALUE_ENTRY(DigiPot3, 	   	"%",   		2010 )\
+	VALUE_ENTRY(DigiPot4, 	   	"%",   		2011 )\
+	VALUE_ENTRY(PWMPUMP,       	OFFON,		2012 )\
+	VALUE_ENTRY(Pump_DC,    	"Count",	2013 )\
+	VALUE_ENTRY(PWMFAN,       	OFFON,		2014 )\
+	VALUE_ENTRY(Fan_DC,    		"Count",	2015 )\
+	VALUE_ENTRY(version,       	VERSTR,		2016 )\
     VALUE_ENTRY(CPU_LOAD,       "%", 		2500 )
 
 
 /***** Enum String definitions *****/
-#define OPMODES      "0=OFF, 1=RUN"
+#define OPMODES      "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
 #define FREQLow      "0=1Hz, 1=2Hz, 2=10Hz"
 #define FREQ         "0=100Hz, 1=500Hz, 2=1kHz, 3=10kHz, 4=100kHz"
 #define OFFON        "0=OFF, 1=ON"
@@ -101,6 +101,9 @@ enum _modes
 {
     MOD_OFF = 0,
     MOD_RUN,
+    MOD_PRECHARGE,
+    MOD_PCHFAIL,
+    MOD_CHARGE,
     MOD_LAST
 };
 
