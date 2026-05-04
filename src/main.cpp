@@ -175,6 +175,7 @@ static void Ms100Task(void)
 	Can_Tasks();
 	LoadValues();
 	tim4_setup();
+	UpdateSOC();
 }
 
 static void Ms200Task(void)
@@ -218,9 +219,7 @@ uint8_t TempToPot(uint16_t temp)
 }
 
 void Can_Tasks()
-{
-	
-	
+{	
 	uint8_t bytes[8];
     bytes[0]= (Param::GetInt(Param::Mode));
     bytes[1]= ((Counter/5) >> 8);
@@ -233,6 +232,16 @@ void Can_Tasks()
     
     can->Send(0x722, bytes, 8); //Send on CAN1	
 	
+}
+
+void UpdateSOC()
+{
+	int SOC = Param::GetInt(Param::SOC);
+	int PotValue = utils::change(SOC, 0, 100, 2, 138);
+	Param::SetInt(Param::Pot1, PotValue);
+	Param::SetInt(Param::Pot2, PotValue);
+	Param::SetInt(Param::Pot3, PotValue);
+	Param::SetInt(Param::Pot4, PotValue);
 }
 
 void CH1Low1Hz()

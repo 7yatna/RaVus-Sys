@@ -6,3 +6,4 @@ linker.map
 *.hex
 *.bin
 *.bin
+/obj

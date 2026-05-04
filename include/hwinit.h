@@ -34,6 +34,7 @@ void tim4_setup(void);
 void CH1Low1Hz();
 void CH1Low2Hz();
 void CH1Low10Hz();
+void UpdateSOC();
 
 void write_bootloader_pininit();
 void Can_Tasks();

@@ -46,7 +46,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 15
+//Next param id (increase when adding new parameter!): 16
 //Next value Id: 2013
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
@@ -64,6 +64,7 @@
 	PARAM_ENTRY(CAT_FANPWM ,    FAN_Frequency, 	FREQ,    	0,      4,  	3,  12)\
 	PARAM_ENTRY(CAT_FANPWM ,    FAN,     		OFFON,     	0,      1,      0,  13)\
     PARAM_ENTRY(CAT_FANPWM ,    FAN_DC,   		"",        	1,     	100, 	50, 14)\
+	PARAM_ENTRY(CAT_IO,         SOC,     		"",     	0,      100,    100,15) \
 	VALUE_ENTRY(MODE,        	OPMODES,	2000 )\
 	VALUE_ENTRY(RunTime,      	"Sec",		2014 )\
 	VALUE_ENTRY(IGN,			OFFON, 		2001 )\
