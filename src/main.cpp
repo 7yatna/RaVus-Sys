@@ -265,8 +265,9 @@ void DecodeCAN(int id, uint32_t* data)
 	uint8_t* bytes = (uint8_t*)data;
 	switch (id)
 	{
-		case 0x1AE:
-			CAN_ON = bytes[0];
+		case 0x500:
+			Param::SetInt(Param::Mode, bytes[0]);
+			Param::SetInt(Param::SOC, bytes[1]);
 			break;
 		case 0x501:
 			Param::SetInt(Param::CAN_MotTemp, bytes[0]);
@@ -288,7 +289,7 @@ void DecodeCAN(int id, uint32_t* data)
 static void SetCanFilters()
 {
 	can->RegisterUserMessage(0x605); //Can SDO
-	can->RegisterUserMessage(0x1AE); //OI Control Message
+	can->RegisterUserMessage(0x500); //OI Control Message
 	can->RegisterUserMessage(0x501); //OI Control Message
 	can->RegisterUserMessage(0x502); //OI Control Message
 	can->RegisterUserMessage(0x503); //OI Control Message
