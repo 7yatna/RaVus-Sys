@@ -35,6 +35,7 @@ void CH1Low1Hz();
 void CH1Low2Hz();
 void CH1Low10Hz();
 void UpdateSOC();
+void Temp_Read();
 
 void write_bootloader_pininit();
 void Can_Tasks();

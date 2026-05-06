@@ -60,6 +60,40 @@ int Mot_Temp = 0;
 int Ac_Req = 0;
 int HTR_Req = 0;
 
+    // LUT — generated from your exact Steinhart-Hart coefficients
+static const int32_t lut_R[] =
+	{
+	 13380,  //   0°C
+	  8480,  //   5°C
+	  5723,  //  10°C
+	  4039,  //  15°C
+	  2948,  //  20°C
+	  2211,  //  25°C
+	  1696,  //  30°C
+	  1325,  //  35°C
+	  1052,  //  40°C
+	   847,  //  45°C
+	   690,  //  50°C
+	   569,  //  55°C
+	   473,  //  60°C
+	   397,  //  65°C
+	   336,  //  70°C
+	   287,  //  75°C
+	   246,  //  80°C
+	   213,  //  85°C
+	   185,  //  90°C
+	   161,  //  95°C
+	   142,  // 100°C
+	   125,  // 105°C
+	   111,  // 110°C
+		99,  // 115°C
+		88,  // 120°C
+	};
+
+#define LUT_SIZE  25
+#define TEMP_MIN   0    // °C
+#define STEP       5    // °C per entry
+
 static void Ms10Task(void)
 {
     //Set timestamp of error message
@@ -96,6 +130,27 @@ static void Ms10Task(void)
 	}
 }
 
+void Temp_Read()
+{
+  float Res = AnaIn::GP_analog2.Get();
+  Param::SetInt(Param::GP2, Res);
+  Res = (2190*Res) / (4095 - Res);			//steinhart equation to estimate temperature value at any resistance from curve of thermistor sensor
+  
+  for (int32_t i = 0; i < LUT_SIZE - 1; i++)
+    {
+        if (Res >= lut_R[i + 1])
+        {
+            int32_t span   = lut_R[i] - lut_R[i + 1];
+            int32_t offset = (span > 0) ? ((STEP * 10) * (lut_R[i] - Res)) / span : 0;
+            int32_t tenths = (TEMP_MIN * 10) + (i * STEP * 10) + offset;
+			if (tenths <= 0) tenths = 0;
+			if (tenths > 1200) tenths = 120;
+            // Convert tenths back to float for SetFloat e.g. 235 → 23.5
+            Param::SetFloat(Param::Temp_Sensor, tenths / 10.0f);
+			return;   // ← critical
+        }
+    }
+}
 
 //sample 100ms task
 static void Ms100Task(void)
@@ -106,9 +161,8 @@ static void Ms100Task(void)
     float cpuLoad = scheduler->GetCpuLoad();
     Param::SetFloat(Param::CPU_LOAD, cpuLoad / 10);
 	int GP1_IN = AnaIn::GP_analog1.Get();
-	int GP2_IN = AnaIn::GP_analog2.Get();
 	Param::SetInt(Param::GP1, GP1_IN);
-	Param::SetInt(Param::GP2, GP2_IN);
+	Temp_Read();
 	if (Mot_Temp <= 10) Mot_Temp = 10;
 	if (Mot_Temp > 100) Mot_Temp = 100;
 	Mot_Temp = Param::GetInt(Param::CAN_MotTemp);

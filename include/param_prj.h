@@ -69,6 +69,7 @@
 	VALUE_ENTRY(GP2,			"", 		2002 )\
 	VALUE_ENTRY(Out1,			OFFON, 		2003 )\
 	VALUE_ENTRY(Out2, 	   	   	OFFON,   	2004 )\
+	VALUE_ENTRY(Temp_Sensor, 	"C",   		2017 )\
 	VALUE_ENTRY(CAN_MotTemp, 	"C",   		2005 )\
 	VALUE_ENTRY(CAN_AC, 	   	OFFON,   	2006 )\
 	VALUE_ENTRY(CAN_HTR, 	   	OFFON,   	2007 )\
