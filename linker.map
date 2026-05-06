@@ -3758,87 +3758,87 @@ LOAD linker stubs
  .debug_abbrev  0x00005d95       0x28 C:/msys64/mingw64/bin/../lib/gcc/arm-none-eabi/13.3.0/thumb/v7/nofp\libgcc.a(_arm_fixsfsi.o)
 
 .debug_loclists
-                0x00000000     0x6d2c
+                0x00000000     0x6d2d
  .debug_loclists
-                0x00000000      0x465 obj/main.o
+                0x00000000      0x466 obj/main.o
  .debug_loclists
-                0x00000465       0x76 obj/hwinit.o
+                0x00000466       0x76 obj/hwinit.o
  .debug_loclists
-                0x000004db      0x152 obj/stm32scheduler.o
+                0x000004dc      0x152 obj/stm32scheduler.o
  .debug_loclists
-                0x0000062d      0x2f5 obj/params.o
+                0x0000062e      0x2f5 obj/params.o
  .debug_loclists
-                0x00000922      0x5a9 obj/terminal.o
+                0x00000923      0x5a9 obj/terminal.o
  .debug_loclists
-                0x00000ecb       0xfb obj/terminal_prj.o
+                0x00000ecc       0xfb obj/terminal_prj.o
  .debug_loclists
-                0x00000fc6      0x245 obj/digio.o
+                0x00000fc7      0x245 obj/digio.o
  .debug_loclists
-                0x0000120b      0x5cd obj/printf.o
+                0x0000120c      0x5cd obj/printf.o
  .debug_loclists
-                0x000017d8      0x24b obj/anain.o
+                0x000017d9      0x24b obj/anain.o
  .debug_loclists
-                0x00001a23      0x118 obj/param_save.o
+                0x00001a24      0x118 obj/param_save.o
  .debug_loclists
-                0x00001b3b       0x6d obj/errormessage.o
+                0x00001b3c       0x6d obj/errormessage.o
  .debug_loclists
-                0x00001ba8      0x35a obj/stm32_can.o
+                0x00001ba9      0x35a obj/stm32_can.o
  .debug_loclists
-                0x00001f02      0x1aa obj/canhardware.o
+                0x00001f03      0x1aa obj/canhardware.o
  .debug_loclists
-                0x000020ac     0x155e obj/canmap.o
+                0x000020ad     0x155e obj/canmap.o
  .debug_loclists
-                0x0000360a      0x984 obj/terminalcommands.o
+                0x0000360b      0x984 obj/terminalcommands.o
  .debug_loclists
-                0x00003f8e      0x124 obj/digipot.o
+                0x00003f8f      0x124 obj/digipot.o
  .debug_loclists
-                0x000040b2      0x8aa obj/cansdo.o
+                0x000040b3      0x8aa obj/cansdo.o
  .debug_loclists
-                0x0000495c      0x164 libopencm3/lib\libopencm3_stm32f1.a(adc.o)
+                0x0000495d      0x164 libopencm3/lib\libopencm3_stm32f1.a(adc.o)
  .debug_loclists
-                0x00004ac0      0x325 libopencm3/lib\libopencm3_stm32f1.a(adc_common_v1.o)
+                0x00004ac1      0x325 libopencm3/lib\libopencm3_stm32f1.a(adc_common_v1.o)
  .debug_loclists
-                0x00004de5      0x7c7 libopencm3/lib\libopencm3_stm32f1.a(can.o)
+                0x00004de6      0x7c7 libopencm3/lib\libopencm3_stm32f1.a(can.o)
  .debug_loclists
-                0x000055ac       0x6a libopencm3/lib\libopencm3_stm32f1.a(crc_common_all.o)
+                0x000055ad       0x6a libopencm3/lib\libopencm3_stm32f1.a(crc_common_all.o)
  .debug_loclists
-                0x00005616       0x2b libopencm3/lib\libopencm3_stm32f1.a(desig_common_v1.o)
+                0x00005617       0x2b libopencm3/lib\libopencm3_stm32f1.a(desig_common_v1.o)
  .debug_loclists
-                0x00005641      0x6a9 libopencm3/lib\libopencm3_stm32f1.a(dma_common_l1f013.o)
+                0x00005642      0x6a9 libopencm3/lib\libopencm3_stm32f1.a(dma_common_l1f013.o)
  .debug_loclists
-                0x00005cea       0x82 libopencm3/lib\libopencm3_stm32f1.a(flash.o)
+                0x00005ceb       0x82 libopencm3/lib\libopencm3_stm32f1.a(flash.o)
  .debug_loclists
-                0x00005d6c       0x17 libopencm3/lib\libopencm3_stm32f1.a(flash_common_all.o)
+                0x00005d6d       0x17 libopencm3/lib\libopencm3_stm32f1.a(flash_common_all.o)
  .debug_loclists
-                0x00005d83       0xa5 libopencm3/lib\libopencm3_stm32f1.a(flash_common_f01.o)
+                0x00005d84       0xa5 libopencm3/lib\libopencm3_stm32f1.a(flash_common_f01.o)
  .debug_loclists
-                0x00005e28       0xd5 libopencm3/lib\libopencm3_stm32f1.a(gpio.o)
+                0x00005e29       0xd5 libopencm3/lib\libopencm3_stm32f1.a(gpio.o)
  .debug_loclists
-                0x00005efd       0x96 libopencm3/lib\libopencm3_stm32f1.a(gpio_common_all.o)
+                0x00005efe       0x96 libopencm3/lib\libopencm3_stm32f1.a(gpio_common_all.o)
  .debug_loclists
-                0x00005f93       0x9d libopencm3/lib\libopencm3_stm32f1.a(iwdg_common_all.o)
+                0x00005f94       0x9d libopencm3/lib\libopencm3_stm32f1.a(iwdg_common_all.o)
  .debug_loclists
-                0x00006030      0x2cb libopencm3/lib\libopencm3_stm32f1.a(rcc.o)
+                0x00006031      0x2cb libopencm3/lib\libopencm3_stm32f1.a(rcc.o)
  .debug_loclists
-                0x000062fb       0x87 libopencm3/lib\libopencm3_stm32f1.a(rcc_common_all.o)
+                0x000062fc       0x87 libopencm3/lib\libopencm3_stm32f1.a(rcc_common_all.o)
  .debug_loclists
-                0x00006382      0x1d9 libopencm3/lib\libopencm3_stm32f1.a(rtc.o)
+                0x00006383      0x1d9 libopencm3/lib\libopencm3_stm32f1.a(rtc.o)
  .debug_loclists
-                0x0000655b      0x145 libopencm3/lib\libopencm3_stm32f1.a(spi_common_all.o)
+                0x0000655c      0x145 libopencm3/lib\libopencm3_stm32f1.a(spi_common_all.o)
  .debug_loclists
-                0x000066a0       0xc9 libopencm3/lib\libopencm3_stm32f1.a(spi_common_v1.o)
+                0x000066a1       0xc9 libopencm3/lib\libopencm3_stm32f1.a(spi_common_v1.o)
  .debug_loclists
-                0x00006769      0x220 libopencm3/lib\libopencm3_stm32f1.a(timer_common_all.o)
+                0x0000676a      0x220 libopencm3/lib\libopencm3_stm32f1.a(timer_common_all.o)
  .debug_loclists
-                0x00006989      0x10e libopencm3/lib\libopencm3_stm32f1.a(usart_common_all.o)
+                0x0000698a      0x10e libopencm3/lib\libopencm3_stm32f1.a(usart_common_all.o)
  .debug_loclists
-                0x00006a97       0x79 libopencm3/lib\libopencm3_stm32f1.a(usart_common_f124.o)
+                0x00006a98       0x79 libopencm3/lib\libopencm3_stm32f1.a(usart_common_f124.o)
  .debug_loclists
-                0x00006b10       0xe2 libopencm3/lib\libopencm3_stm32f1.a(vector.o)
+                0x00006b11       0xe2 libopencm3/lib\libopencm3_stm32f1.a(vector.o)
  .debug_loclists
-                0x00006bf2       0x29 libopencm3/lib\libopencm3_stm32f1.a(scb.o)
+                0x00006bf3       0x29 libopencm3/lib\libopencm3_stm32f1.a(scb.o)
  .debug_loclists
-                0x00006c1b      0x111 libopencm3/lib\libopencm3_stm32f1.a(nvic.o)
+                0x00006c1c      0x111 libopencm3/lib\libopencm3_stm32f1.a(nvic.o)
 
 .debug_aranges  0x00000000     0x1650
  .debug_aranges

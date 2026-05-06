@@ -143,8 +143,8 @@ void Temp_Read()
             int32_t span   = lut_R[i] - lut_R[i + 1];
             int32_t offset = (span > 0) ? ((STEP * 10) * (lut_R[i] - Res)) / span : 0;
             int32_t tenths = (TEMP_MIN * 10) + (i * STEP * 10) + offset;
+			if (tenths > 1200) tenths = 1200;
 			if (tenths <= 0) tenths = 0;
-			if (tenths > 1200) tenths = 120;
             // Convert tenths back to float for SetFloat e.g. 235 → 23.5
             Param::SetFloat(Param::Temp_Sensor, tenths / 10.0f);
 			return;   // ← critical
